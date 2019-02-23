@@ -7,7 +7,7 @@ from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ConversationHandler
 
 from bot import log
-from bot_files.utils import prepare_next_books
+from bot_files.utils import prepare_next_items
 from const import FLIBUSTA_TEMPLATE, FLIB_END
 
 
@@ -73,7 +73,7 @@ def flibusta(bot, update, args, user_data):
 
     if update.message.text == 'Дальше!' or args:
         show_flibusta_book(bot, update, user_data)
-        reply_keyboard = prepare_next_books(user_data)
+        reply_keyboard = prepare_next_items(user_data, 'found_books')
 
         reply_markup = ReplyKeyboardMarkup(reply_keyboard, n_rows=2,
                                            one_time_keyboard=True,
