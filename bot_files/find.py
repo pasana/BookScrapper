@@ -82,7 +82,10 @@ def author(bot, update, args=None, user_data=None):
                                     author_id)
             body = BeautifulSoup(response.content, "lxml")
             try:
-                user_data['found_books'] = body.find('ul', {'class': "sr_book"}).findAll('li')[1:]
+                titles = body.find('ul', {'class': "sr_book"}).findAll('li')
+                user_data['found_books'] = list(filter(lambda x:
+                                                       x.a['href'].split('.')[0] == 'view_global',
+                                                       titles))
                 user_data['BOOKS'] = {}
             except AttributeError:
                 pass

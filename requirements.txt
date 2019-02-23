@@ -3,3 +3,4 @@ emoji
 python-telegram-bot
 requests
 lxml
+transliterate
