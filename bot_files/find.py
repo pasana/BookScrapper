@@ -225,11 +225,11 @@ def find(bot, update, args=None, user_data=None):
         #     reply_keyboard += [['Серии книг']]
         if len(reply_keyboard) == 1:
             if books:
-                display_books(bot, update, args, user_data)
-                return 21
+                state = display_books(bot, update, args, user_data)
+                return state  # 21
             if authors:
-                display_authors(bot, update, args, user_data)
-                return 22
+                state = display_authors(bot, update, args, user_data)
+                return state  #22
         reply_keyboard += [['Отмена']]
 
         reply_markup = ReplyKeyboardMarkup(reply_keyboard, n_rows=2,
@@ -244,6 +244,8 @@ def find(bot, update, args=None, user_data=None):
         reply = "Введи запрос!"
         log.log_bot(reply, update)
         update.message.reply_text(reply)
+        user_data['no_command_caller'] = 'find'
+        return 404
 
 
 # TODO: replace by find in other modules

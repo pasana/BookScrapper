@@ -29,7 +29,7 @@ def flibusta_search(query):
         result_books += [{
             'author': author.text,
             'title': title.text,
-            'href': href,
+            'href': urllib.parse.unquote(href),
         }]
     return result_books
 
@@ -86,3 +86,5 @@ def flibusta(bot, update, args, user_data):
         reply = "Введи запрос!"
         log.log_bot(reply, update)
         update.message.reply_text(reply)
+        user_data['no_command_caller'] = 'flibusta'
+        return 404

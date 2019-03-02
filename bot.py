@@ -38,8 +38,11 @@ def main():
     find_handler = ConversationHandler(
         entry_points=[CommandHandler('find', find, pass_args=True, pass_user_data=True)],
         states={
+            404: [RegexHandler('([\w ]+)', no_command_message, pass_user_data=True,
+                               pass_groups=True)],
 
-            12: [RegexHandler('\d', book, pass_user_data=True),
+            12: [
+                RegexHandler('\d', book, pass_user_data=True),
                  RegexHandler('Отмена', cancel, pass_user_data=True),
                  RegexHandler('Дальше!', find_book, pass_user_data=True),
                  RegexHandler('Книги', display_books, pass_user_data=True),
@@ -61,7 +64,7 @@ def main():
             23: [RegexHandler('\d', series, pass_user_data=True),
                  RegexHandler('Отмена', cancel, pass_user_data=True),
                  RegexHandler('Дальше!', display_series, pass_user_data=True)
-                 ]
+                 ],
 
         },
         fallbacks=[CommandHandler('cancel', cancel, pass_user_data=True)],
@@ -75,17 +78,32 @@ def main():
             12: [RegexHandler('\d', flibusta_book, pass_user_data=True),
                  RegexHandler('Отмена', cancel, pass_user_data=True),
                  RegexHandler('Дальше!', flibusta, pass_user_data=True)
-                 ]
+                 ],
+            404: [RegexHandler('([\w ]+)', no_command_message, pass_user_data=True, pass_groups=True)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel, pass_user_data=True)], allow_reentry=True
+    )
+
+    heybot_handler = ConversationHandler(
+        entry_points=[CommandHandler('heybot', heybot, pass_args=True, pass_user_data=True)],
+        states={
+            100: [
+                RegexHandler('[\w ]*', flibusta_book, pass_user_data=True),
+                RegexHandler('', no_command_message, pass_user_data=True, pass_groups=True),
+            ],
+            404: [RegexHandler('([\w ]+)', no_command_message, pass_user_data=True, pass_groups=True)]
+
         },
         fallbacks=[CommandHandler('cancel', cancel, pass_user_data=True)], allow_reentry=True
     )
 
     dp.add_handler(CommandHandler('hello', hello))
     dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(CommandHandler('book', book, pass_args=True))
+    # dp.add_handler(CommandHandler('book', book, pass_args=True))
     dp.add_handler(random_handler)
     dp.add_handler(find_handler)
     dp.add_handler(flibusta_handler)
+    dp.add_handler(heybot_handler)
     dp.add_handler(MessageHandler(Filters.command, unknown))
     # dp.add_handler(MessageHandler(Filters.text, unknown_text))
 
