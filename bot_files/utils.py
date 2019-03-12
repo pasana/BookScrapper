@@ -1,3 +1,5 @@
+import re
+
 from transliterate import translit
 
 
@@ -14,4 +16,5 @@ def prepare_next_items(user_data, item_type):
 def valid_filename(filename):
     # cyrillic characters doesn't work for some reason
     new_filename = translit('.'.join(filename.split('.')[:-1]), "ru", reversed=True)
+    new_filename = re.sub('[^0-9A-Za-z ]+', '', new_filename)
     return new_filename + '.fb2'
