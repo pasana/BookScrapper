@@ -6,9 +6,11 @@ from transliterate import translit
 def prepare_next_items(user_data, item_type):
     if len(user_data[item_type]) > 5:
         user_data[item_type] = user_data[item_type][5:]
-        reply_keyboard = [[str(x) for x in range(1, 6)], ["Отмена", "Дальше!"]]
+        reply_keyboard = [[str(x) for x in range(1, 6)],
+                          ["Отмена", "Flibusta", "Дальше!"]]
     else:
-        reply_keyboard = [[str(x) for x in range(1, len(user_data[item_type]) + 1)], ["Отмена"]]
+        reply_keyboard = [[str(x) for x in range(1, len(user_data[item_type]) + 1)],
+                          ["Отмена", "Flibusta"]]
         del user_data[item_type]
     return reply_keyboard
 

@@ -48,6 +48,7 @@ def main():
                  RegexHandler('Книги', display_books, pass_user_data=True),
                  RegexHandler('Авторы', display_authors, pass_user_data=True),
                  RegexHandler('Серии книг', display_series, pass_user_data=True),
+                RegexHandler('Попробовать Флибусту?', flibusta, pass_user_data=True),
                  ],
             13: [RegexHandler('\d', author, pass_user_data=True),
                  RegexHandler('Отмена', cancel, pass_user_data=True),
@@ -55,7 +56,8 @@ def main():
                  ],
             21: [RegexHandler('\d', book, pass_user_data=True),
                  RegexHandler('Отмена', cancel, pass_user_data=True),
-                 RegexHandler('Дальше!', display_books, pass_user_data=True)
+                 RegexHandler('Дальше!', display_books, pass_user_data=True),
+                 RegexHandler('Flibusta', flibusta, pass_user_data=True),
                  ],
             22: [RegexHandler('\d', author, pass_user_data=True),
                  RegexHandler('Отмена', cancel, pass_user_data=True),
@@ -64,6 +66,10 @@ def main():
             23: [RegexHandler('\d', series, pass_user_data=True),
                  RegexHandler('Отмена', cancel, pass_user_data=True),
                  RegexHandler('Дальше!', display_series, pass_user_data=True)
+                 ],
+            31: [RegexHandler('\d', flibusta_book, pass_user_data=True),
+                 RegexHandler('Отмена', cancel, pass_user_data=True),
+                 RegexHandler('Дальше!', flibusta, pass_user_data=True)
                  ],
 
         },
@@ -75,7 +81,7 @@ def main():
         entry_points=[CommandHandler('flibusta', flibusta, pass_args=True, pass_user_data=True)],
         states={
 
-            12: [RegexHandler('\d', flibusta_book, pass_user_data=True),
+            31: [RegexHandler('\d', flibusta_book, pass_user_data=True),
                  RegexHandler('Отмена', cancel, pass_user_data=True),
                  RegexHandler('Дальше!', flibusta, pass_user_data=True)
                  ],

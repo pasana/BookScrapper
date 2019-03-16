@@ -31,6 +31,7 @@ def get_user(line):
             return user_pattern_v1.search(line).groupdict()
 
 
+json_array = []
 clean_data = set()
 users = dict()
 commands = list()
@@ -63,7 +64,17 @@ with open('bookscrapper_bot.log', 'r') as logs:
                 users[user['user_id']]['messages_count'] = 1
                 del users[user['user_id']]['user_id']
 
+            item = {'time': line[:32]}
+            item.update(user)
+            item.update(message)
+            json_array += [item]
+
 print("USERS: ")
 pprint.pprint(users)
 
 pprint.pprint(Counter(commands))
+
+print(len(json_array))
+import json
+
+json.dump(json_array, open('parsed_logs.json', 'w'))

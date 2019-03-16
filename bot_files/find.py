@@ -1,4 +1,5 @@
 import os
+import time
 
 bot_token = os.environ['TELEGRAM_TOKEN']
 
@@ -9,12 +10,48 @@ from bs4 import BeautifulSoup
 from emoji import emojize
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ConversationHandler
+from telegram import ChatAction
 
 from const import SEARCH_TEMPLATE
 from parser import Parser
 
 from bot import log
 from bot_files.utils import prepare_next_items, valid_filename
+
+# TODO: try this
+
+# import gevent
+# from gevent import monkey; monkey.patch_all()
+#
+# greenlet = gevent.spawn( function_to_download_image )
+# display_message()
+# # ... perhaps interaction with the user here
+#
+# # this will wait for the operation to complete (optional)
+# greenlet.join()
+# # alternatively if the image display is no longer important, this will abort it:
+# #greenlet.kill()
+
+
+from functools import wraps
+
+
+def send_typing_action(func):
+    """Sends typing action while processing func command."""
+
+    @wraps(func)
+    def command_func(bot, update, *args, **kwargs):
+        bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.TYPING)
+        return func(bot, update, *args, **kwargs)
+
+    return command_func
+
+
+@send_typing_action
+def download_handler(bot, update, parser):
+    bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.TYPING)
+    return parser.run()
+
 
 
 def book(bot, update, args=None, user_data=None):
@@ -48,8 +85,10 @@ def book(bot, update, args=None, user_data=None):
             bot.send_message(chat_id=update.message.chat_id,
                              text=reply,
                              reply_markup=ReplyKeyboardRemove())
-
+            time.sleep(2)
+            bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.TYPING)
             filename = parser.run()
+            # filename = download_handler(bot, update, parser)
             file_result = parser.doc.get_file()
             bot.send_document(chat_id=update.message.chat_id,
                               document=file_result,
@@ -104,7 +143,7 @@ def series(bot, update, args=None, user_data=None):
     pass
 
 def loveread_search(args):
-    query = ' '.join(args)
+    query = ' '.join(args).replace('ё', 'е')
     query_param = urllib.parse.quote_plus(query, encoding='cp1251')
     response = requests.get(SEARCH_TEMPLATE % query_param)
     body = BeautifulSoup(response.content, "lxml")
@@ -204,12 +243,13 @@ def display_series(bot, update, args=None, user_data=None):
 def find(bot, update, args=None, user_data=None):
     log.log_user(update)
     if args:
+        user_data['query'] = args
         books, authors, series = loveread_search(args)
         if not (books or authors or series):
             reply = "Ничего не найдено!"
             log.log_bot(reply, update)
             update.message.reply_text(reply, reply_markup=ReplyKeyboardRemove())
-            return ConversationHandler.END
+            # return ConversationHandler.END
         reply_keyboard = []
         if books:
             user_data['found_books'] = books
@@ -230,12 +270,17 @@ def find(bot, update, args=None, user_data=None):
             if authors:
                 state = display_authors(bot, update, args, user_data)
                 return state  #22
+        elif len(reply_keyboard) == 0:
+            reply_keyboard += [['Попробовать Флибусту?']]
+            reply = 'Что теперь?'
+        else:
+            reply = "Что тебя интересует?"
         reply_keyboard += [['Отмена']]
 
         reply_markup = ReplyKeyboardMarkup(reply_keyboard, n_rows=2,
                                            one_time_keyboard=True,
                                            resize_keyboard=True)
-        reply = "Что тебя интересует?"
+
         log.log_bot(reply, update)
         update.message.reply_text(reply, reply_markup=reply_markup)
         return 12

@@ -14,6 +14,8 @@ from const import FLIBUSTA_TEMPLATE, FLIB_END
 def flibusta_search(query):
     query_param = urllib.parse.quote_plus("название:(%s)" % query, encoding='utf-8')
     response = requests.get(FLIBUSTA_TEMPLATE % query_param + FLIB_END)
+    if response.status_code != 200:
+        return -1
     body = BeautifulSoup(response.content, "lxml")
 
     found_books = body.findAll('div', {'class': 'col-sm-12 serp-row'})
@@ -59,12 +61,25 @@ def flibusta_book(bot, update, user_data):
     return ConversationHandler.END
 
 
-def flibusta(bot, update, args, user_data):
+def flibusta(bot, update, args=None, user_data=None):
     log.log_user(update)
+    if not args:
+        try:
+            args = user_data['query']
+            reply = 'Начинаем поиск с Flibusta'
+            update.message.reply_text(reply)
+            log.log_bot(reply, update)
+        except KeyError:
+            return ConversationHandler.END
     if args:
         found_books = flibusta_search(' '.join(args))
         if not found_books:
             reply = "Ничего не найдено!"
+            log.log_bot(reply, update)
+            update.message.reply_text(reply, reply_markup=ReplyKeyboardRemove())
+            return ConversationHandler.END
+        elif found_books == -1:
+            reply = "Не могу получить ответа от Flibusta!"
             log.log_bot(reply, update)
             update.message.reply_text(reply, reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
@@ -81,7 +96,7 @@ def flibusta(bot, update, args, user_data):
         reply = "Выбери номер книги внизу"
         log.log_bot(reply, update)
         update.message.reply_text(reply, reply_markup=reply_markup)
-        return 12
+        return 31
     else:
         reply = "Введи запрос!"
         log.log_bot(reply, update)
